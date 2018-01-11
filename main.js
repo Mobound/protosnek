@@ -5,8 +5,15 @@ var score;
 var snakeArray;
 var mazeArray;
 var changeDirection = false;
+var canvasWidth = 450;
+var canvasHeight = 500;
 var gameWidth = 450;
 var gameHeight = 450;
+var screenflow = "main-menu"
+
+function startMenu() {
+	
+}
 
 function startGame() {
 	direction = "right";
@@ -21,8 +28,8 @@ function startGame() {
 var myGameArea = {
 	canvas : document.createElement("canvas"),
 	start : function() {
-		this.canvas.width = 450;
-		this.canvas.height = 500;
+		this.canvas.width = canvasWidth;
+		this.canvas.height = canvasHeight;
 		
 		this.context = this.canvas.getContext("2d");
 		
@@ -50,7 +57,7 @@ var myGameArea = {
 		});
 	},
 	clear : function() {
-		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		this.context.clearRect(0, 0, canvasWidth, canvasHeight);
 	},
 	stop : function() {
 		clearInterval(this.interval);
@@ -173,7 +180,7 @@ function updateGameArea() {
 	myGameArea.context.strokeStyle = "black";
 	myGameArea.context.strokeRect(0, gameHeight, gameWidth, 50);
 	myGameArea.context.fillStyle = "black";
-	myGameArea.context.fillText(scoreText, 5, myGameArea.canvas.height - 5);
+	myGameArea.context.fillText(scoreText, 5, canvasHeight - 5);
 }
 
 function paintCell(x, y, color, isSnake, part) {
