@@ -1,0 +1,3 @@
+function startMenu() {
+	// TODO
+}
