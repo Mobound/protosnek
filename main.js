@@ -11,7 +11,7 @@ var gameWidth = 450;
 var gameHeight = 450;
 
 // Possible screens: main-menu, game, game-over
-var screenflow = "game"
+var screenflow = "main-menu"
 
 var myGameArea = {
 	canvas : document.createElement("canvas"),
@@ -43,23 +43,34 @@ var myGameArea = {
 				}
 			}
 		});
+		window.addEventListener('mouseup', function (e) {
+			if (screenflow == "main-menu") {
+				startGame();
+			} else if (screenflow == "game-over") {
+				startMenu();
+			}
+		});
 
 		// TODO add touch controls
 	},
 	clear : function() {
 		this.context.clearRect(0, 0, canvasWidth, canvasHeight);
-	},
-	stop : function() {
-		clearInterval(this.interval);
 	}
 }
 
+function startApp() {
+	myGameArea.start();
+	startMenu();
+}
+
 function updateArea() {
+	myGameArea.clear();
+
 	if (screenflow == "game") {
 		updateGameArea();
 	} else if (screenflow == "main-menu") {
-		// TODO
+		updateMainMenu();
 	} else if (screenflow == "game-over") {
-		// TODO
+		doGameOver();
 	}
 }

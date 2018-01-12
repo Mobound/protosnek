@@ -1,11 +1,11 @@
 function startGame() {
+	screenflow = "game";
 	direction = "right";
 	score = 0;
 	
 	generateLevel();
 	createSnake();
 	createFood();
-	myGameArea.start();
 }
 
 function createSnake() {
@@ -31,8 +31,6 @@ function createFood() {
 }
 
 function updateGameArea() {
-	myGameArea.clear();
-
 	var newX = snakeArray[0].x;
 	var newY = snakeArray[0].y;
 	changeDirection = false;
@@ -54,7 +52,7 @@ function updateGameArea() {
 	}
 	
 	if (checkCollision(newX, newY, snakeArray) || checkCollision(newX, newY, mazeArray)) {
-		myGameArea.stop();
+		screenflow = "game-over";
 		return;
 	}
 	
