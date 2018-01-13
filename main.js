@@ -9,9 +9,6 @@ var canvasWidth = 450;
 var canvasHeight = 500;
 var gameWidth = 450;
 var gameHeight = 450;
-var bgTile;
-var apple;
-var mazeTile;
 
 // Possible screens: main-menu, game, game-over
 var screenflow = "main-menu"
@@ -62,13 +59,6 @@ var myGameArea = {
 }
 
 function startApp() {
-	bgTile = new Image();
-	bgTile.src = "img/background-tile.png";
-	apple = new Image();
-	apple.src = "img/apple.png";
-	mazeTile = new Image();
-	mazeTile.src = "img/stone-wall.png";
-
 	myGameArea.start();
 	startMenu();
 }

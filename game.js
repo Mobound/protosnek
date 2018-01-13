@@ -31,9 +31,6 @@ function createFood() {
 }
 
 function updateGameArea() {
-	// Renders background
-	renderBackground();
-
 	var newX = snakeArray[0].x;
 	var newY = snakeArray[0].y;
 	changeDirection = false;
@@ -104,17 +101,17 @@ function updateGameArea() {
 			part = "tail-" + previousDirection(snakeArray[i-1].x, snakeArray[i-1].y, cell.x, cell.y);
 		}
 		
-		paintCell(cell.x, cell.y, "snake", part);
+		paintCell(cell.x, cell.y, "green", true, part);
 	}
 	
 	// renders the food
-	paintCell(food.x, food.y, "apple", '');
+	paintCell(food.x, food.y, "red", false, '');
 	
 	// renders the maze
 	for (var i = 0; i < mazeArray.length; i++) {
 		var cell = mazeArray[i];
 		
-		paintCell(cell.x, cell.y, "maze", '');
+		paintCell(cell.x, cell.y, "blue", false, '');
 	}
 	
 	// Draws the score
@@ -128,24 +125,17 @@ function updateGameArea() {
 	myGameArea.context.fillText(scoreText, 5, canvasHeight - 5);
 }
 
-function renderBackground() {
-	for (i = 0; i < gameWidth / cellWidth; i++) {
-		for (j = 0; j < gameHeight / cellWidth; j++) {
-			myGameArea.context.drawImage(bgTile, i * cellWidth, j * cellWidth, cellWidth, cellWidth);
-		}
-	}
-}
-
-function paintCell(x, y, cellType, part) {
-	if (cellType == "snake") {
+function paintCell(x, y, color, isSnake, part) {
+	if (isSnake) {
 		var image = new Image();
 		image.src = "img/snake-" + part + ".png";
 		
 		myGameArea.context.drawImage(image, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
-	} else if (cellType == "apple") {
-		myGameArea.context.drawImage(apple, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
-	} else if (cellType == "maze") {
-		myGameArea.context.drawImage(mazeTile, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+	} else {
+		myGameArea.context.fillStyle = color;
+		myGameArea.context.fillRect(x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+		myGameArea.context.strokeStyle = "white";
+		myGameArea.context.strokeRect(x * cellWidth, y * cellWidth, cellWidth, cellWidth);
 	}
 }
 
