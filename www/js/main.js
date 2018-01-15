@@ -53,8 +53,30 @@ var myGameArea = {
 				startMenu();
 			}
 		});
+		window.addEventListener('touchstart', function(e) {
+			this.startX = touchObj.pageX;
+			this.startY = touchObj.pageY;
+			
+			e.preventDefault();
+		});
+		window.addEventListener('touchmove', function(e) {
+			e.preventDefault();
+		});
+		window.addEventListener('touchend', function(e) {
+			var touchObj = e.changedTouches[0];
+			distX = touchObj.pageX - startX;
+			distY = touchObj.pageY - startY;
+			
+			if (Math.abs(distX) >= Math.abs(distY) && direction != "right" && direction != "left"){
+				direction = (distX < 0)? "left" : "right";
+				changeDirection = true;
+			} else if (Math.abs(distY) >= Math.abs(distX) && direction != "up" && direction != "down"){
+				direction = (distY < 0)? "up" : "down";
+				changeDirection = true;
+			}
 
-		// TODO add touch controls
+			e.preventDefault();
+		});
 	},
 	clear : function() {
 		this.context.clearRect(0, 0, canvasWidth, canvasHeight);
