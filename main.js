@@ -11,7 +11,15 @@ var gameWidth = 450;
 var gameHeight = 450;
 var bgTile;
 var apple;
+var pineapple;
+var grapes;
 var mazeTile;
+var speed;
+var stage;
+var appleCounter;
+var pineappleCounter;
+var grapesTimer;
+var lastMoveTs;
 
 // Possible screens: main-menu, game, game-over
 var screenflow = "main-menu"
@@ -25,10 +33,12 @@ var myGameArea = {
 		this.context = this.canvas.getContext("2d");
 		
 		document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-		
+		/*
 		if (typeof this.interval != "undefined") clearInterval(this.interval);
 		this.interval = setInterval(updateArea, 60);
-		
+		*/
+		lastMoveTs = new Date().getTime();
+		requestAnimationFrame(updateArea);
 		window.addEventListener('keydown', function (e) {
 			if (!changeDirection) {
 				if (e.keyCode == 37 && direction != "right") {
@@ -61,11 +71,26 @@ var myGameArea = {
 	}
 }
 
+window.requestAnimationFrame = window.requestAnimationFrame
+    || window.mozRequestAnimationFrame
+    || window.webkitRequestAnimationFrame
+    || window.msRequestAnimationFrame
+    || function(f){return setTimeout(f, 1000/60)}
+ 
+window.cancelAnimationFrame = window.cancelAnimationFrame
+    || window.mozCancelAnimationFrame
+    || function(requestID){clearTimeout(requestID)}
+
 function startApp() {
+	// loading images
 	bgTile = new Image();
 	bgTile.src = "img/background-tile.png";
 	apple = new Image();
 	apple.src = "img/apple.png";
+	pineapple = new Image();
+	pineapple.src = "img/pineapple.png";
+	grapes = new Image();
+	grapes.src = "img/grapes.png";
 	mazeTile = new Image();
 	mazeTile.src = "img/stone-wall.png";
 
@@ -77,10 +102,12 @@ function updateArea() {
 	myGameArea.clear();
 
 	if (screenflow == "game") {
-		updateGameArea();
+		updateGameArea(new Date().getTime());
 	} else if (screenflow == "main-menu") {
 		updateMainMenu();
 	} else if (screenflow == "game-over") {
 		doGameOver();
 	}
+
+	requestAnimationFrame(updateArea);
 }
