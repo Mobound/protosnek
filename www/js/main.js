@@ -12,19 +12,21 @@ var gameHeight = 450;
 var bgTile;
 var apple;
 var mazeTile;
+var xRatio;
+var yRatio;
 
 // Possible screens: main-menu, game, game-over
 var screenflow = "main-menu"
 
 var myGameArea = {
-	canvas : document.createElement("canvas"),
+	canvas : document.getElementById("main"),
 	start : function() {
 		this.canvas.width = canvasWidth;
 		this.canvas.height = canvasHeight;
 		
 		this.context = this.canvas.getContext("2d");
 		
-		document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+		this.previousSize = {width: this.canvas.width, height: this.canvas.height};
 		
 		if (typeof this.interval != "undefined") clearInterval(this.interval);
 		this.interval = setInterval(updateArea, 60);
@@ -54,10 +56,17 @@ var myGameArea = {
 			}
 		});
 		window.addEventListener('touchstart', function(e) {
-			this.startX = touchObj.pageX;
-			this.startY = touchObj.pageY;
+			if (screenflow == "main-menu") {
+				startGame();
+			} else if (screenflow == "game-over") {
+				startMenu();
+			} else {
+				var touchObj = e.changedTouches[0]
+				this.startX = touchObj.pageX;
+				this.startY = touchObj.pageY;
 			
-			e.preventDefault();
+				e.preventDefault();
+			}
 		});
 		window.addEventListener('touchmove', function(e) {
 			e.preventDefault();
@@ -80,7 +89,7 @@ var myGameArea = {
 	},
 	clear : function() {
 		this.context.clearRect(0, 0, canvasWidth, canvasHeight);
-	}
+	},
 }
 
 function startApp() {
@@ -97,6 +106,10 @@ function startApp() {
 
 function updateArea() {
 	myGameArea.clear();
+	
+	// prolly uneeded
+	xRatio = myGameArea.canvas.width / myGameArea.previousSize.width;
+	yRatio = myGameArea.canvas.height / myGameArea.previousSize.height;
 
 	if (screenflow == "game") {
 		updateGameArea();
