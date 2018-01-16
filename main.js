@@ -1,6 +1,8 @@
 var cellWidth = 10;
 var direction;
 var food;
+var grapes;
+var createGrapes = false;
 var score;
 var snakeArray;
 var mazeArray;
@@ -10,9 +12,9 @@ var canvasHeight = 500;
 var gameWidth = 450;
 var gameHeight = 450;
 var bgTile;
-var apple;
-var pineapple;
-var grapes;
+var appleImg;
+var pineappleImg;
+var grapesImg;
 var mazeTile;
 var speed;
 var stage;
@@ -22,7 +24,7 @@ var grapesTimer;
 var lastMoveTs;
 
 // Possible screens: main-menu, game, game-over
-var screenflow = "main-menu"
+var screenflow = "main-menu";
 
 var myGameArea = {
 	canvas : document.createElement("canvas"),
@@ -85,12 +87,12 @@ function startApp() {
 	// loading images
 	bgTile = new Image();
 	bgTile.src = "img/background-tile.png";
-	apple = new Image();
-	apple.src = "img/apple.png";
-	pineapple = new Image();
-	pineapple.src = "img/pineapple.png";
-	grapes = new Image();
-	grapes.src = "img/grapes.png";
+	appleImg = new Image();
+	appleImg.src = "img/apple.png";
+	pineappleImg = new Image();
+	pineappleImg.src = "img/pineapple.png";
+	grapesImg = new Image();
+	grapesImg.src = "img/grapes.png";
 	mazeTile = new Image();
 	mazeTile.src = "img/stone-wall.png";
 

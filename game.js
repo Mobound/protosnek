@@ -7,6 +7,8 @@ function startGame() {
 	appleCounter = 0;
 	pineappleCounter = 0;
 	grapesTimer = 0;
+	createGrapes = false;
+	grapes = null;
 	
 	generateLevel();
 	createSnake();
@@ -45,6 +47,23 @@ function createFood(type) {
 	} else if (type == "pineapple") {
 		pineappleCounter++;
 		if (pineappleCounter == 2) {
+			pineappleCounter = 0;
+			createGrapes = true;
+		}
+	} else if (type == "grapes") {
+		grapesTimer = new Date().getTime();
+		grapes = {
+			x: Math.round(Math.random()*(gameWidth - cellWidth) / cellWidth),
+			y: Math.round(Math.random()*(gameHeight - cellWidth) / cellWidth),
+			type: "grapes",
+		};
+		while (checkCollision(grapes.x, grapes.y, snakeArray) || checkCollision(grapes.x, grapes.y, mazeArray)
+				|| (grapes.x == food.x && grapes.y == food.y)) {
+			grapes = {
+				x: Math.round(Math.random()*(gameWidth - cellWidth) / cellWidth),
+				y: Math.round(Math.random()*(gameHeight - cellWidth) / cellWidth),
+				type: "grapes",
+			};
 		}
 	}
 }
@@ -83,11 +102,22 @@ function updateGameArea(timestamp) {
 		if(newX == food.x && newY == food.y) {
 			var tail = {x: newX, y: newY};
 			score++;
+			if (food.type == "pineapple") {
+				speed += 2;
+				score += 4;
+				if (createGrapes) {
+					createGrapes = false;
+					createFood("grapes");
+				}
+			}
 			
-			createFood();
-		}
-		else
-		{
+			createFood("apple");
+		} else if (grapes != null && newX == grapes.x && newY == grapes.y) {
+			grapesTimer = 0;
+			var tail = {x: newX, y: newY};
+			speed = speed - 3;
+			score += 5;
+		} else {
 			var tail = snakeArray.pop();
 			tail.x = newX; tail.y = newY;
 		}
@@ -131,6 +161,9 @@ function updateGameArea(timestamp) {
 	
 	// renders the food
 	paintCell(food.x, food.y, food.type, '');
+	if (timestamp - grapesTimer < 20000) {
+		paintCell(grapes.x, grapes.y, grapes.type, '');
+	}
 	
 	// renders the maze
 	for (var i = 0; i < mazeArray.length; i++) {
@@ -165,11 +198,11 @@ function paintCell(x, y, cellType, part) {
 		
 		myGameArea.context.drawImage(image, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
 	} else if (cellType == "apple") {
-		myGameArea.context.drawImage(apple, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+		myGameArea.context.drawImage(appleImg, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
 	} else if (cellType == "pineapple") {
-		myGameArea.context.drawImage(pineapple, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+		myGameArea.context.drawImage(pineappleImg, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
 	} else if (cellType == "grapes") {
-		myGameArea.context.drawImage(grapes, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+		myGameArea.context.drawImage(grapesImg, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
 	} else if (cellType == "maze") {
 		myGameArea.context.drawImage(mazeTile, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
 	}
