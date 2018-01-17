@@ -22,23 +22,22 @@ var appleCounter;
 var pineappleCounter;
 var grapesTimer;
 var lastMoveTs;
+var xRatio;
+var yRatio;
 
 // Possible screens: main-menu, game, game-over
 var screenflow = "main-menu";
 
 var myGameArea = {
-	canvas : document.createElement("canvas"),
+	canvas : document.getElementById("main"),
 	start : function() {
 		this.canvas.width = canvasWidth;
 		this.canvas.height = canvasHeight;
 		
 		this.context = this.canvas.getContext("2d");
 		
-		document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-		/*
-		if (typeof this.interval != "undefined") clearInterval(this.interval);
-		this.interval = setInterval(updateArea, 60);
-		*/
+		this.previousSize = {width: this.canvas.width, height: this.canvas.height};
+		
 		lastMoveTs = new Date().getTime();
 		requestAnimationFrame(updateArea);
 		window.addEventListener('keydown', function (e) {
@@ -65,8 +64,37 @@ var myGameArea = {
 				startMenu();
 			}
 		});
+		window.addEventListener('touchstart', function(e) {
+			if (screenflow == "main-menu") {
+				startGame();
+			} else if (screenflow == "game-over") {
+				startMenu();
+			} else {
+				var touchObj = e.changedTouches[0]
+				this.startX = touchObj.pageX;
+				this.startY = touchObj.pageY;
+			
+				e.preventDefault();
+			}
+		});
+		window.addEventListener('touchmove', function(e) {
+			e.preventDefault();
+		});
+		window.addEventListener('touchend', function(e) {
+			var touchObj = e.changedTouches[0];
+			distX = touchObj.pageX - startX;
+			distY = touchObj.pageY - startY;
+			
+			if (Math.abs(distX) >= Math.abs(distY) && direction != "right" && direction != "left"){
+				direction = (distX < 0)? "left" : "right";
+				changeDirection = true;
+			} else if (Math.abs(distY) >= Math.abs(distX) && direction != "up" && direction != "down"){
+				direction = (distY < 0)? "up" : "down";
+				changeDirection = true;
+			}
 
-		// TODO add touch controls
+			e.preventDefault();
+		});
 	},
 	clear : function() {
 		this.context.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -102,6 +130,10 @@ function startApp() {
 
 function updateArea() {
 	myGameArea.clear();
+
+	// prolly uneeded
+	xRatio = myGameArea.canvas.width / myGameArea.previousSize.width;
+	yRatio = myGameArea.canvas.height / myGameArea.previousSize.height;
 
 	if (screenflow == "game") {
 		updateGameArea(new Date().getTime());
