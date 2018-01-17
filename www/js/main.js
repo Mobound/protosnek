@@ -16,6 +16,9 @@ var appleImg;
 var pineappleImg;
 var grapesImg;
 var mazeTile;
+var verticalDoorTile;
+var horizontalDoorTile;
+var portalAnimController = 1;
 var speed;
 var stage;
 var appleCounter;
@@ -24,6 +27,7 @@ var grapesTimer;
 var lastMoveTs;
 var xRatio;
 var yRatio;
+var tillNextLevel;
 
 // Possible screens: main-menu, game, game-over
 var screenflow = "main-menu";
@@ -123,6 +127,10 @@ function startApp() {
 	grapesImg.src = "img/grapes.png";
 	mazeTile = new Image();
 	mazeTile.src = "img/stone-wall.png";
+	verticalDoorTile = new Image();
+	verticalDoorTile.src = "img/doors-vertical.png";
+	horizontalDoorTile = new Image();
+	horizontalDoorTile.src = "img/doors-horizontal.png";
 
 	myGameArea.start();
 	startMenu();

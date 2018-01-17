@@ -94,6 +94,7 @@ function updateGameArea(timestamp) {
 			newY = 0;
 		}
 		
+		// TODO start new level after collision with a portal.
 		if (checkCollision(newX, newY, snakeArray) || checkCollision(newX, newY, mazeArray)) {
 			screenflow = "game-over";
 			return;
@@ -102,9 +103,11 @@ function updateGameArea(timestamp) {
 		if(newX == food.x && newY == food.y) {
 			var tail = {x: newX, y: newY};
 			score++;
+			tillNextLevel--;
 			if (food.type == "pineapple") {
 				speed += 2;
 				score += 4;
+				tillNextLevel -= 4;
 				if (createGrapes) {
 					createGrapes = false;
 					createFood("grapes");
@@ -118,6 +121,7 @@ function updateGameArea(timestamp) {
 			var tail = {x: newX, y: newY};
 			speed = speed - 3;
 			score += 5;
+			tillNextLevel -= 5;
 		} else {
 			var tail = snakeArray.pop();
 			tail.x = newX; tail.y = newY;
@@ -170,7 +174,7 @@ function updateGameArea(timestamp) {
 	for (var i = 0; i < mazeArray.length; i++) {
 		var cell = mazeArray[i];
 		
-		paintCell(cell.x, cell.y, "maze", '');
+		paintCell(cell.x, cell.y, cell.type, '');
 	}
 	
 	// Draws the score
@@ -206,6 +210,26 @@ function paintCell(x, y, cellType, part) {
 		myGameArea.context.drawImage(grapesImg, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
 	} else if (cellType == "maze") {
 		myGameArea.context.drawImage(mazeTile, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+	} else if (cellType == "doors-vertical") {
+		if (tillNextLevel > 0) {
+			myGameArea.context.drawImage(verticalDoorTile, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+		} else {
+			var image = new Image();
+			image.src = "img/portal-vertical-" + portalAnimController++ + ".png";
+			myGameArea.context.drawImage(image, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+		}
+	} else if (cellType == "doors-horizontal") {
+		if (tillNextLevel > 0) {
+			myGameArea.context.drawImage(horizontalDoorTile, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+		} else {
+			var image = new Image();
+			image.src = "img/portal-vertical-" + portalAnimController++ + ".png";
+			myGameArea.context.drawImage(image, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+		}
+	}
+
+	if (portalAnimController > 2) {
+		portalAnimController = 1;
 	}
 }
 
@@ -221,13 +245,18 @@ function checkCollision(x, y, array) {
 
 function generateLevel() {
 	mazeArray = [];
-	// 'x' for walls, 'o' for empty spaces
+	tillNextLevel = 50;
+	// 'x' for walls, 'o' for empty spaces, 'v' for vertical doors, 'h' for horizontal doors
 	levelData = window[("level" + stage)]().split("|");
 	
 	for(var i = 0; i < levelData.length; i++) {
 		for(var j = 0; j < levelData[i].length; j++)  {
 			if (levelData[i].charAt(j) == 'x') {
-				mazeArray.push({x: j, y: i});
+				mazeArray.push({x: j, y: i, type: "maze"});
+			} else  if (levelData[i].charAt(j) == 'v') {
+				mazeArray.push({x: j, y: i, type: "doors-vertical"});
+			} else  if (levelData[i].charAt(j) == 'h') {
+				mazeArray.push({x: j, y: i, type: "doors-horizontal"});
 			}
 		}
 	}
