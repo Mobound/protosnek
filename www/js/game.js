@@ -2,10 +2,17 @@ function startGame() {
 	screenflow = "game";
 	direction = "right";
 	score = 0;
+	speed = 5;
+	stage = 1;
+	appleCounter = 0;
+	pineappleCounter = 0;
+	grapesTimer = 0;
+	createGrapes = false;
+	grapes = null;
 	
 	generateLevel();
 	createSnake();
-	createFood();
+	createFood("apple");
 }
 
 function createSnake() {
@@ -17,62 +24,107 @@ function createSnake() {
 	}
 }
 
-function createFood() {
+function createFood(type) {
 	food = {
 		x: Math.round(Math.random()*(gameWidth - cellWidth) / cellWidth),
 		y: Math.round(Math.random()*(gameHeight - cellWidth) / cellWidth),
+		type: type,
 	};
 	while (checkCollision(food.x, food.y, snakeArray) || checkCollision(food.x, food.y, mazeArray)) {
 		food = {
 			x: Math.round(Math.random()*(gameWidth - cellWidth) / cellWidth),
 			y: Math.round(Math.random()*(gameHeight - cellWidth) / cellWidth),
+			type: type,
 		};
+	}
+	
+	if (type == "apple") {
+		appleCounter++;
+		if (appleCounter == 5) {
+			appleCounter = 0;
+			createFood("pineapple");
+		}
+	} else if (type == "pineapple") {
+		pineappleCounter++;
+		if (pineappleCounter == 2) {
+			pineappleCounter = 0;
+			createGrapes = true;
+		}
+	} else if (type == "grapes") {
+		grapesTimer = new Date().getTime();
+		grapes = {
+			x: Math.round(Math.random()*(gameWidth - cellWidth) / cellWidth),
+			y: Math.round(Math.random()*(gameHeight - cellWidth) / cellWidth),
+			type: "grapes",
+		};
+		while (checkCollision(grapes.x, grapes.y, snakeArray) || checkCollision(grapes.x, grapes.y, mazeArray)
+				|| (grapes.x == food.x && grapes.y == food.y)) {
+			grapes = {
+				x: Math.round(Math.random()*(gameWidth - cellWidth) / cellWidth),
+				y: Math.round(Math.random()*(gameHeight - cellWidth) / cellWidth),
+				type: "grapes",
+			};
+		}
 	}
 }
 
-function updateGameArea() {
+function updateGameArea(timestamp) {
 	// Renders background
 	renderBackground();
 
-	var newX = snakeArray[0].x;
-	var newY = snakeArray[0].y;
-	changeDirection = false;
-	
-	if (direction == "right") {newX++; }
-	else if (direction == "left") {newX--; }
-	else if (direction == "up") {newY--;}
-	else if (direction == "down") {newY++; }
-	
-	// makes the snake reappears at the other side
-	if (newX == -1) {
-		newX += gameWidth / cellWidth
-	} else if (newX == gameWidth / cellWidth) {
-		newX = 0;
-	} else if (newY == -1) {
-		newY += gameHeight / cellWidth;
-	} else if (newY == gameHeight / cellWidth) {
-		newY = 0;
-	}
-	
-	if (checkCollision(newX, newY, snakeArray) || checkCollision(newX, newY, mazeArray)) {
-		screenflow = "game-over";
-		return;
-	}
-	
-	if(newX == food.x && newY == food.y) {
-		var tail = {x: newX, y: newY};
-		score++;
+	if (timestamp - lastMoveTs > 1000 / speed) {
+		lastMoveTs = timestamp;
+		var newX = snakeArray[0].x;
+		var newY = snakeArray[0].y;
+		changeDirection = false;
 		
-		createFood();
+		if (direction == "right") {newX++; }
+		else if (direction == "left") {newX--; }
+		else if (direction == "up") {newY--;}
+		else if (direction == "down") {newY++; }
+		
+		// makes the snake reappears at the other side
+		if (newX == -1) {
+			newX += gameWidth / cellWidth
+		} else if (newX == gameWidth / cellWidth) {
+			newX = 0;
+		} else if (newY == -1) {
+			newY += gameHeight / cellWidth;
+		} else if (newY == gameHeight / cellWidth) {
+			newY = 0;
+		}
+		
+		if (checkCollision(newX, newY, snakeArray) || checkCollision(newX, newY, mazeArray)) {
+			screenflow = "game-over";
+			return;
+		}
+		
+		if(newX == food.x && newY == food.y) {
+			var tail = {x: newX, y: newY};
+			score++;
+			if (food.type == "pineapple") {
+				speed += 2;
+				score += 4;
+				if (createGrapes) {
+					createGrapes = false;
+					createFood("grapes");
+				}
+			}
+			
+			createFood("apple");
+		} else if (grapes != null && newX == grapes.x && newY == grapes.y) {
+			grapesTimer = 0;
+			var tail = {x: newX, y: newY};
+			speed = speed - 3;
+			score += 5;
+		} else {
+			var tail = snakeArray.pop();
+			tail.x = newX; tail.y = newY;
+		}
+		
+		snakeArray.unshift(tail);
 	}
-	else
-	{
-		var tail = snakeArray.pop();
-		tail.x = newX; tail.y = newY;
-	}
-	
-	snakeArray.unshift(tail);
-	
+
 	// renders the snake
 	for (var i = 0; i < snakeArray.length; i++) {
 		var cell = snakeArray[i];
@@ -108,7 +160,10 @@ function updateGameArea() {
 	}
 	
 	// renders the food
-	paintCell(food.x, food.y, "apple", '');
+	paintCell(food.x, food.y, food.type, '');
+	if (timestamp - grapesTimer < 20000) {
+		paintCell(grapes.x, grapes.y, grapes.type, '');
+	}
 	
 	// renders the maze
 	for (var i = 0; i < mazeArray.length; i++) {
@@ -143,7 +198,11 @@ function paintCell(x, y, cellType, part) {
 		
 		myGameArea.context.drawImage(image, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
 	} else if (cellType == "apple") {
-		myGameArea.context.drawImage(apple, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+		myGameArea.context.drawImage(appleImg, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+	} else if (cellType == "pineapple") {
+		myGameArea.context.drawImage(pineappleImg, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+	} else if (cellType == "grapes") {
+		myGameArea.context.drawImage(grapesImg, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
 	} else if (cellType == "maze") {
 		myGameArea.context.drawImage(mazeTile, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
 	}
