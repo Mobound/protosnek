@@ -10,7 +10,7 @@ function startGame() {
 	createGrapes = false;
 	grapes = null;
 	
-	generateLevel("1");
+	generateLevel();
 	createSnake();
 	createFood("apple");
 }
@@ -219,31 +219,18 @@ function checkCollision(x, y, array) {
 	return false;
 }
 
-function generateLevel(level) {
+function generateLevel() {
 	mazeArray = [];
+	// 'x' for walls, 'o' for empty spaces
+	levelData = window[("level" + stage)]().split("|");
 	
-	/*
-	xhttp = new XMLHttpRequest();
-
-	xhttp,open("GET", "levels/" + level + ".lvl", false);
-	xhttp.send();
-	levelData = xhttp.responseText.split("\n");
-	*/
-	fetch("levels/" + level + ".lvl")
-		.then(function(response){
-			return response.text();
-		})
-		.then(function(levelText) {
-			levelData = levelText.split("\n");
-			for(var i = 0; i < levelData.length; i++) {
-				for(var j = 0; j < levelData[i].length; j++)  {
-					if (levelData[i].charAt(j) == 'x') {
-						mazeArray.push({x: i, y: j});
-					}
-				}
+	for(var i = 0; i < levelData.length; i++) {
+		for(var j = 0; j < levelData[i].length; j++)  {
+			if (levelData[i].charAt(j) == 'x') {
+				mazeArray.push({x: j, y: i});
 			}
-		});
-
+		}
+	}
 }
 /* older level design
 function generateLevel() {
