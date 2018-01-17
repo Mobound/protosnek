@@ -113,6 +113,7 @@ function updateGameArea(timestamp) {
 			
 			createFood("apple");
 		} else if (grapes != null && newX == grapes.x && newY == grapes.y) {
+			grapes = null;
 			grapesTimer = 0;
 			var tail = {x: newX, y: newY};
 			speed = speed - 3;
@@ -220,6 +221,20 @@ function checkCollision(x, y, array) {
 
 function generateLevel() {
 	mazeArray = [];
+	// 'x' for walls, 'o' for empty spaces
+	levelData = window[("level" + stage)]().split("|");
+	
+	for(var i = 0; i < levelData.length; i++) {
+		for(var j = 0; j < levelData[i].length; j++)  {
+			if (levelData[i].charAt(j) == 'x') {
+				mazeArray.push({x: j, y: i});
+			}
+		}
+	}
+}
+/* older level design
+function generateLevel() {
+	mazeArray = [];
 	
 	for(var i = 3; i < 41; i++) {
 		mazeArray.push({x: i, y: 0});
@@ -241,7 +256,7 @@ function generateLevel() {
 		mazeArray.push({x: 11, y: i + 25});
 	}
 }
-
+*/
 function previousDirection(oldX, oldY, newX, newY) {
 	if (oldX == newX) {
 		if (oldY < newY) {

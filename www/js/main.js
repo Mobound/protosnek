@@ -38,10 +38,6 @@ var myGameArea = {
 		
 		this.previousSize = {width: this.canvas.width, height: this.canvas.height};
 		
-		/*
-		if (typeof this.interval != "undefined") clearInterval(this.interval);
-		this.interval = setInterval(updateArea, 60);
-		*/
 		lastMoveTs = new Date().getTime();
 		requestAnimationFrame(updateArea);
 		window.addEventListener('keydown', function (e) {
