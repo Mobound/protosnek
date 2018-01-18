@@ -1,9 +1,7 @@
 function startGame() {
 	screenflow = "game";
-	direction = "right";
 	score = 0;
-	speed = 5;
-	stage = 1;
+	stage = 0;
 	appleCounter = 0;
 	pineappleCounter = 0;
 	grapesTimer = 0;
@@ -11,7 +9,6 @@ function startGame() {
 	grapes = null;
 	
 	generateLevel();
-	createSnake();
 	createFood("apple");
 }
 
@@ -19,8 +16,8 @@ function createSnake() {
 	var length = 5;
 	snakeArray = [];
 	
-	for(var i = length; i > 0; i--) {
-		snakeArray.push({x: i, y: 1});
+	for(var i = startingPos.x; i > startingPos.x - length; i--) {
+		snakeArray.push({x: i, y: startingPos.y});
 	}
 }
 
@@ -76,7 +73,11 @@ function updateGameArea(timestamp) {
 		lastMoveTs = timestamp;
 		var newX = snakeArray[0].x;
 		var newY = snakeArray[0].y;
-		changeDirection = false;
+
+		if (changeDirection) {
+			changeDirection = false;
+			direction = nextDirection;
+		}
 		
 		if (direction == "right") {newX++; }
 		else if (direction == "left") {newX--; }
@@ -236,7 +237,9 @@ function paintCell(x, y, cellType, part) {
 function checkCollision(x, y, array) {
 	for (var i = 0; i < array.length; i++) {
 		if (array[i].x == x && array[i].y == y) {
-			return true;
+			if (!array[i].type || (array[i].type != "doors-vertical" && array[i].type != "doors-horizontal") || tillNextLevel > 0) {
+				return true;
+			}
 		}
 	}
 	
@@ -245,9 +248,8 @@ function checkCollision(x, y, array) {
 
 function generateLevel() {
 	mazeArray = [];
-	tillNextLevel = 50;
 	// 'x' for walls, 'o' for empty spaces, 'v' for vertical doors, 'h' for horizontal doors
-	levelData = window[("level" + stage)]().split("|");
+	levelData = window[("level" + ++stage)]().split("|");
 	
 	for(var i = 0; i < levelData.length; i++) {
 		for(var j = 0; j < levelData[i].length; j++)  {
@@ -260,6 +262,8 @@ function generateLevel() {
 			}
 		}
 	}
+
+	createSnake();
 }
 /* older level design
 function generateLevel() {

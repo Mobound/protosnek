@@ -1,5 +1,6 @@
 var cellWidth = 10;
 var direction;
+var nextDirection;
 var food;
 var grapes;
 var createGrapes = false;
@@ -21,6 +22,7 @@ var horizontalDoorTile;
 var portalAnimController = 1;
 var speed;
 var stage;
+var startingPos
 var appleCounter;
 var pineappleCounter;
 var grapesTimer;
@@ -47,16 +49,16 @@ var myGameArea = {
 		window.addEventListener('keydown', function (e) {
 			if (!changeDirection) {
 				if (e.keyCode == 37 && direction != "right") {
-					direction = "left";
+					nextDirection = "left";
 					changeDirection = true;
 				} else if (e.keyCode == 38 && direction != "down") {
-					direction = "up";
+					nextDirection = "up";
 					changeDirection = true;
 				} else if (e.keyCode == 39 && direction != "left") {
-					direction = "right";
+					nextDirection = "right";
 					changeDirection = true;
 				} else if (e.keyCode == 40 && direction != "up") {
-					direction = "down";
+					nextDirection = "down";
 					changeDirection = true;
 				}
 			}
@@ -90,10 +92,10 @@ var myGameArea = {
 			distY = touchObj.pageY - startY;
 			
 			if (Math.abs(distX) >= Math.abs(distY) && direction != "right" && direction != "left"){
-				direction = (distX < 0)? "left" : "right";
+				nextDirection = (distX < 0)? "left" : "right";
 				changeDirection = true;
 			} else if (Math.abs(distY) >= Math.abs(distX) && direction != "up" && direction != "down"){
-				direction = (distY < 0)? "up" : "down";
+				nextDirection = (distY < 0)? "up" : "down";
 				changeDirection = true;
 			}
 
