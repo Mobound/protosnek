@@ -1,4 +1,9 @@
 function level1() {
+	startingPos = {x: 1, y: 23};
+	speed = 5;
+	direction = "right";
+	tillNextLevel = 50;
+
 	return "oooooooooooooooooooooooooooooooooooooooooooox"
 		+ "|oooooooooooooooooooooooooooooooooooooooooooox"
 		+ "|oooooooooooooooooooooooooooooooooooooooooooox"
