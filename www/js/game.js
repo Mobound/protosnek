@@ -2,11 +2,6 @@ function startGame() {
 	screenflow = "game";
 	score = 0;
 	stage = 0;
-	appleCounter = 0;
-	pineappleCounter = 0;
-	grapesTimer = 0;
-	createGrapes = false;
-	grapes = null;
 	
 	generateLevel();
 	createFood("apple");
@@ -95,12 +90,16 @@ function updateGameArea(timestamp) {
 			newY = 0;
 		}
 		
-		// TODO start new level after collision with a portal.
 		if (checkCollision(newX, newY, snakeArray) || checkCollision(newX, newY, mazeArray)) {
 			screenflow = "game-over";
 			return;
 		}
 		
+		if (passLevel) {
+			generateLevel();
+			return;
+		}
+
 		if(newX == food.x && newY == food.y) {
 			var tail = {x: newX, y: newY};
 			score++;
@@ -239,7 +238,9 @@ function checkCollision(x, y, array) {
 		if (array[i].x == x && array[i].y == y) {
 			if (!array[i].type || (array[i].type != "doors-vertical" && array[i].type != "doors-horizontal") || tillNextLevel > 0) {
 				return true;
-			}
+			}/* TODO
+			if () {
+			}*/
 		}
 	}
 	
@@ -247,8 +248,14 @@ function checkCollision(x, y, array) {
 }
 
 function generateLevel() {
+	appleCounter = 0;
+	pineappleCounter = 0;
+	grapesTimer = 0;
+	createGrapes = false;
+	grapes = null;
+	passLevel = false;
 	mazeArray = [];
-	// 'x' for walls, 'o' for empty spaces, 'v' for vertical doors, 'h' for horizontal doors
+	// 'x' for walls, 'o' for empty spaces, 'v' for vertical doors, 'h' for horizontal doors, 's' for spikes
 	levelData = window[("level" + ++stage)]().split("|");
 	
 	for(var i = 0; i < levelData.length; i++) {

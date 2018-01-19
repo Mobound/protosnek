@@ -30,6 +30,7 @@ var lastMoveTs;
 var xRatio;
 var yRatio;
 var tillNextLevel;
+var passLevel;
 
 // Possible screens: main-menu, game, game-over
 var screenflow = "main-menu";
