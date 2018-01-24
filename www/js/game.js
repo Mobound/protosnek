@@ -22,7 +22,7 @@ function createFood(type) {
 		y: Math.round(Math.random()*(gameHeight - cellWidth) / cellWidth),
 		type: type,
 	};
-	while (checkCollision(food.x, food.y, snakeArray) || checkCollision(food.x, food.y, mazeArray)) {
+	while (checkCollision(food.x, food.y, snakeArray, false) || checkCollision(food.x, food.y, mazeArray, false)) {
 		food = {
 			x: Math.round(Math.random()*(gameWidth - cellWidth) / cellWidth),
 			y: Math.round(Math.random()*(gameHeight - cellWidth) / cellWidth),
@@ -49,7 +49,7 @@ function createFood(type) {
 			y: Math.round(Math.random()*(gameHeight - cellWidth) / cellWidth),
 			type: "grapes",
 		};
-		while (checkCollision(grapes.x, grapes.y, snakeArray) || checkCollision(grapes.x, grapes.y, mazeArray)
+		while (checkCollision(grapes.x, grapes.y, snakeArray, false) || checkCollision(grapes.x, grapes.y, mazeArray, false)
 				|| (grapes.x == food.x && grapes.y == food.y)) {
 			grapes = {
 				x: Math.round(Math.random()*(gameWidth - cellWidth) / cellWidth),
@@ -90,7 +90,7 @@ function updateGameArea(timestamp) {
 			newY = 0;
 		}
 		
-		if (checkCollision(newX, newY, snakeArray) || checkCollision(newX, newY, mazeArray)) {
+		if (checkCollision(newX, newY, snakeArray, true) || checkCollision(newX, newY, mazeArray, true)) {
 			screenflow = "game-over";
 			return;
 		}
@@ -233,14 +233,15 @@ function paintCell(x, y, cellType, part) {
 	}
 }
 
-function checkCollision(x, y, array) {
+function checkCollision(x, y, array, isSnake) {
 	for (var i = 0; i < array.length; i++) {
 		if (array[i].x == x && array[i].y == y) {
 			if (!array[i].type || (array[i].type != "doors-vertical" && array[i].type != "doors-horizontal") || tillNextLevel > 0) {
 				return true;
-			}/* TODO
-			if () {
-			}*/
+			}
+			if (isSnake && (array[i].type == "doors-vertical" || array[i].type == "doors-horizontal") && tillNextLevel <= 0) {
+				passLevel = true;
+			}
 		}
 	}
 	
