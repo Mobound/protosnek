@@ -1,17 +1,9 @@
 function startGame() {
 	screenflow = "game";
-	direction = "right";
 	score = 0;
-	speed = 5;
-	stage = 1;
-	appleCounter = 0;
-	pineappleCounter = 0;
-	grapesTimer = 0;
-	createGrapes = false;
-	grapes = null;
+	stage = 0;
 	
 	generateLevel();
-	createSnake();
 	createFood("apple");
 }
 
@@ -19,8 +11,8 @@ function createSnake() {
 	var length = 5;
 	snakeArray = [];
 	
-	for(var i = length; i > 0; i--) {
-		snakeArray.push({x: i, y: 1});
+	for(var i = startingPos.x; i > startingPos.x - length; i--) {
+		snakeArray.push({x: i, y: startingPos.y});
 	}
 }
 
@@ -30,7 +22,7 @@ function createFood(type) {
 		y: Math.round(Math.random()*(gameHeight - cellWidth) / cellWidth),
 		type: type,
 	};
-	while (checkCollision(food.x, food.y, snakeArray) || checkCollision(food.x, food.y, mazeArray)) {
+	while (checkCollision(food.x, food.y, snakeArray, false) || checkCollision(food.x, food.y, mazeArray, false)) {
 		food = {
 			x: Math.round(Math.random()*(gameWidth - cellWidth) / cellWidth),
 			y: Math.round(Math.random()*(gameHeight - cellWidth) / cellWidth),
@@ -57,7 +49,7 @@ function createFood(type) {
 			y: Math.round(Math.random()*(gameHeight - cellWidth) / cellWidth),
 			type: "grapes",
 		};
-		while (checkCollision(grapes.x, grapes.y, snakeArray) || checkCollision(grapes.x, grapes.y, mazeArray)
+		while (checkCollision(grapes.x, grapes.y, snakeArray, false) || checkCollision(grapes.x, grapes.y, mazeArray, false)
 				|| (grapes.x == food.x && grapes.y == food.y)) {
 			grapes = {
 				x: Math.round(Math.random()*(gameWidth - cellWidth) / cellWidth),
@@ -76,7 +68,11 @@ function updateGameArea(timestamp) {
 		lastMoveTs = timestamp;
 		var newX = snakeArray[0].x;
 		var newY = snakeArray[0].y;
-		changeDirection = false;
+
+		if (changeDirection) {
+			changeDirection = false;
+			direction = nextDirection;
+		}
 		
 		if (direction == "right") {newX++; }
 		else if (direction == "left") {newX--; }
@@ -94,17 +90,24 @@ function updateGameArea(timestamp) {
 			newY = 0;
 		}
 		
-		if (checkCollision(newX, newY, snakeArray) || checkCollision(newX, newY, mazeArray)) {
+		if (checkCollision(newX, newY, snakeArray, true) || checkCollision(newX, newY, mazeArray, true)) {
 			screenflow = "game-over";
 			return;
 		}
 		
+		if (passLevel) {
+			generateLevel();
+			return;
+		}
+
 		if(newX == food.x && newY == food.y) {
 			var tail = {x: newX, y: newY};
 			score++;
+			tillNextLevel--;
 			if (food.type == "pineapple") {
 				speed += 2;
 				score += 4;
+				tillNextLevel -= 4;
 				if (createGrapes) {
 					createGrapes = false;
 					createFood("grapes");
@@ -118,6 +121,7 @@ function updateGameArea(timestamp) {
 			var tail = {x: newX, y: newY};
 			speed = speed - 3;
 			score += 5;
+			tillNextLevel -= 5;
 		} else {
 			var tail = snakeArray.pop();
 			tail.x = newX; tail.y = newY;
@@ -170,7 +174,7 @@ function updateGameArea(timestamp) {
 	for (var i = 0; i < mazeArray.length; i++) {
 		var cell = mazeArray[i];
 		
-		paintCell(cell.x, cell.y, "maze", '');
+		paintCell(cell.x, cell.y, cell.type, '');
 	}
 	
 	// Draws the score
@@ -206,13 +210,38 @@ function paintCell(x, y, cellType, part) {
 		myGameArea.context.drawImage(grapesImg, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
 	} else if (cellType == "maze") {
 		myGameArea.context.drawImage(mazeTile, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+	} else if (cellType == "doors-vertical") {
+		if (tillNextLevel > 0) {
+			myGameArea.context.drawImage(verticalDoorTile, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+		} else {
+			var image = new Image();
+			image.src = "img/portal-vertical-" + portalAnimController++ + ".png";
+			myGameArea.context.drawImage(image, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+		}
+	} else if (cellType == "doors-horizontal") {
+		if (tillNextLevel > 0) {
+			myGameArea.context.drawImage(horizontalDoorTile, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+		} else {
+			var image = new Image();
+			image.src = "img/portal-vertical-" + portalAnimController++ + ".png";
+			myGameArea.context.drawImage(image, x * cellWidth, y * cellWidth, cellWidth, cellWidth);
+		}
+	}
+
+	if (portalAnimController > 2) {
+		portalAnimController = 1;
 	}
 }
 
-function checkCollision(x, y, array) {
+function checkCollision(x, y, array, isSnake) {
 	for (var i = 0; i < array.length; i++) {
 		if (array[i].x == x && array[i].y == y) {
-			return true;
+			if (!array[i].type || (array[i].type != "doors-vertical" && array[i].type != "doors-horizontal") || tillNextLevel > 0) {
+				return true;
+			}
+			if (isSnake && (array[i].type == "doors-vertical" || array[i].type == "doors-horizontal") && tillNextLevel <= 0) {
+				passLevel = true;
+			}
 		}
 	}
 	
@@ -220,17 +249,29 @@ function checkCollision(x, y, array) {
 }
 
 function generateLevel() {
+	appleCounter = 0;
+	pineappleCounter = 0;
+	grapesTimer = 0;
+	createGrapes = false;
+	grapes = null;
+	passLevel = false;
 	mazeArray = [];
-	// 'x' for walls, 'o' for empty spaces
-	levelData = window[("level" + stage)]().split("|");
+	// 'x' for walls, 'o' for empty spaces, 'v' for vertical doors, 'h' for horizontal doors, 's' for spikes
+	levelData = window[("level" + ++stage)]().split("|");
 	
 	for(var i = 0; i < levelData.length; i++) {
 		for(var j = 0; j < levelData[i].length; j++)  {
 			if (levelData[i].charAt(j) == 'x') {
-				mazeArray.push({x: j, y: i});
+				mazeArray.push({x: j, y: i, type: "maze"});
+			} else  if (levelData[i].charAt(j) == 'v') {
+				mazeArray.push({x: j, y: i, type: "doors-vertical"});
+			} else  if (levelData[i].charAt(j) == 'h') {
+				mazeArray.push({x: j, y: i, type: "doors-horizontal"});
 			}
 		}
 	}
+
+	createSnake();
 }
 /* older level design
 function generateLevel() {
